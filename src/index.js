@@ -1,22 +1,24 @@
 import './index.scss'
 
-const numberBlock = document.querySelector('[data-number-block][data-maxlength]')
-const blockSize = [...document.querySelectorAll('input[name="size"]')]
-const palette = document.querySelector('[data-palette]')
-const templates = document.querySelector('#templates')
+const drawBlockElement = document.querySelector('[data-number-block][data-maxlength]')
+const gridSizeContainerElement = document.querySelector('[data-size] [data-container]')
+const paletteContainerElement = document.querySelector('[data-palette] [data-container]')
+const customPaletteInputelements = [...document.querySelectorAll('[data-custom-palette-input]')]
+const templatesSelectElement = document.querySelector('[data-templates-select]')
 const copy = document.querySelector('#copy')
 const paste = document.querySelector('#paste')
 const canvas = document.querySelector('#pixel')
 const canvasContext = canvas.getContext('2d')
 
-let gridSize = 8;
+let currentGridSize = 0;
+const gridSizes = [8, 16, 32]
 const pixelSize = 16;
 
 const temps = [
     {
         name: 'blank',
         grid: 8,
-        template: '0'.repeat(gridSize ** 2)
+        template: '0'.repeat(gridSizes[currentGridSize] ** 2)
     },
     {
         name: 'red',
@@ -30,7 +32,6 @@ const temps = [
 ]
 
 let currentPalette = 0
-
 const palettes = [
     [
         '405010',
@@ -47,23 +48,47 @@ const palettes = [
         '822d30',
         'eb754d',
         'f8b581'
+    ], [
+        '2c2137',
+        '764462',
+        'a96868',
+        'edb4a1'
+    ], [
+        '00303b',
+        '4e494c',
+        'd4984a',
+        'ffffc7'
+    ], [
+        '301221',
+        '854576',
+        '9e81d0',
+        'eebff5'
+    ], [
+        '181010',
+        '84739c',
+        'f7b58c',
+        'ffefff'
     ]
 ]
 
+const possibleNumbers = palettes[0].map((c, i) => i).join('')
+
 
 const setBlockInner = () => {
-    numberBlock.innerText = '0'.repeat(+numberBlock.dataset.maxlength)
+    drawBlockElement.innerText = '0'.repeat(+drawBlockElement.dataset.maxlength)
 }
 
+const checkIfValidHexColor = text => /^[0-9A-F]{6}$/i.test(text)
+
 const redrawCanvas = (fields) => {
-    if (!fields) fields = '0'.repeat(+numberBlock.dataset.maxlength)
+    if (!fields) fields = drawBlockElement.innerText
     let x = 0
     let y = 0
 
     for (let i = 0; i < fields.length; i++) {
         const digit = +fields[i]
         if (i !== 0) {
-            if (i % gridSize === 0) {
+            if (i % gridSizes[currentGridSize] === 0) {
                 x = 0
                 y += pixelSize
             } else {
@@ -71,7 +96,8 @@ const redrawCanvas = (fields) => {
             }
         }
 
-        const color = palettes[currentPalette][digit]
+        const customPaletteColor = customPaletteInputelements[digit].value.trim()
+        const color = checkIfValidHexColor(customPaletteColor) ? customPaletteColor : palettes[currentPalette][digit]
         canvasContext.fillStyle = `#${color}`
         canvasContext.fillRect(x, y, pixelSize, pixelSize)
     }
@@ -90,13 +116,12 @@ const moveCaret = (el, pos) => {
 
 const limitCharacters = ev => {
     const {key, target} = ev
-    if (!target) return
 
     const maxLength = +target.dataset.maxlength
 
     if (!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)) ev.preventDefault()
 
-    if (!'0123'.includes(key)) return
+    if (!possibleNumbers.includes(key)) return
 
     const {anchorOffset: index} = document.getSelection()
     target.innerText = `${target.innerText.substr(0, index)}${key}${target.innerText.substr(index + 1)}`
@@ -106,30 +131,45 @@ const limitCharacters = ev => {
         target.innerText = target.innerText.substr(0, maxLength)
     }
 
-    redrawCanvas(target.innerText)
+    redrawCanvas()
 }
 
-setBlockInner()
-numberBlock.addEventListener('keydown', limitCharacters, false)
-
-const changeBlockSize = size => {
-    numberBlock.dataset.maxlength = `${(size) ** 2}`
-    numberBlock.style.setProperty('--grid-size', size)
-    gridSize = size
-    setBlockInner()
-    canvas.width = canvas.height = gridSize * pixelSize
-}
-
-blockSize.forEach(size => {
-    size.addEventListener('change', ({target}) => {
-        changeBlockSize(+target.value)
-        redrawCanvas(numberBlock.innerText)
+const changeGridSize = size => {
+    currentGridSize = size
+    const actualSize = gridSizes[size]
+    const sizeRadios = [...document.querySelectorAll('input[name="size"]')]
+    sizeRadios.forEach((element, index) => {
+        element.checked = index === size
     })
-})
+    drawBlockElement.dataset.maxlength = `${(actualSize) ** 2}`
+    drawBlockElement.style.setProperty('--grid-size', actualSize + '')
+    setBlockInner()
+    canvas.width = canvas.height = gridSizes[currentGridSize] * pixelSize
+}
+
+const buildGridSize = () => {
+    for (let i = 0; i < gridSizes.length; i++) {
+        const radio = document.createElement('input')
+        radio.type = 'radio'
+        radio.name = 'size'
+        radio.value = gridSizes[i] + ''
+        radio.checked = i === 0
+        radio.addEventListener('change', () => {
+            changeGridSize(i)
+            redrawCanvas()
+        })
+
+        const label = document.createElement('label')
+
+        label.append(radio)
+        label.append(`${gridSizes[i]}x${gridSizes[i]}`)
+        gridSizeContainerElement.append(label)
+    }
+}
 
 const changePalette = (index) => {
     currentPalette = index;
-    redrawCanvas(numberBlock.innerText)
+    redrawCanvas()
 }
 
 const buildPalette = () => {
@@ -140,7 +180,9 @@ const buildPalette = () => {
         radio.value = i + ''
         radio.checked = i === 0
 
-        const container = palette.querySelector('[data-container]')
+        radio.addEventListener('change', () => {
+            changePalette(i)
+        })
 
         const label = document.createElement('label')
         label.append(radio)
@@ -151,34 +193,34 @@ const buildPalette = () => {
             label.append(block)
         })
 
-        container.append(label)
-        radio.addEventListener('change', () => {
-            changePalette(i)
-        })
-
-        palette.append(container)
+        paletteContainerElement.append(label)
     }
 }
+
+customPaletteInputelements.forEach(element => {
+    element.addEventListener('input', () => {redrawCanvas()})
+})
+
 
 const buildTemplates = () => {
     temps.forEach(template => {
         const option = document.createElement('option')
         option.value = `${template.grid}|${template.template}`
         option.innerText = template.name
-        templates.append(option)
+        templatesSelectElement.append(option)
     })
 }
 
-templates.addEventListener('change', ({target}) => {
+templatesSelectElement.addEventListener('change', ({target}) => {
     const [grid, template] = target.value.split('|')
-    changeBlockSize(grid)
-    numberBlock.innerText = template
-    redrawCanvas(numberBlock.innerText)
+    changeGridSize(gridSizes.findIndex(el => el === +grid))
+    drawBlockElement.innerText = template
+    redrawCanvas()
 })
 
 copy.addEventListener('click', () => {
     const textarea = document.createElement("textarea");
-    textarea.textContent = numberBlock.innerText;
+    textarea.textContent = drawBlockElement.innerText;
     textarea.style.position = "fixed";
     document.body.appendChild(textarea);
     textarea.select();
@@ -199,17 +241,23 @@ copy.addEventListener('click', () => {
 paste.addEventListener('click', () => {
     navigator.clipboard.readText()
         .then(text => {
-            const maxLength = +numberBlock.dataset.maxlength
-            const insert = text.replace(/[^0123]/g, '').substr(0, maxLength)
+            const maxLength = +drawBlockElement.dataset.maxlength
+            const regex = new RegExp(`[^${possibleNumbers}]`, 'g')
+            const insert = text.replace(regex, '').substr(0, maxLength)
             let rest = '0'.repeat(maxLength - insert.length > 0 ? maxLength - insert.length : 0)
-            numberBlock.innerText = insert + rest
-            redrawCanvas(insert + rest)
+            drawBlockElement.innerText = insert + rest
+            redrawCanvas()
         })
         .catch(err => {
             console.error('Failed to read clipboard contents: ', err);
         });
 })
 
+
+setBlockInner()
+buildGridSize()
 buildPalette()
 buildTemplates()
 redrawCanvas()
+
+drawBlockElement.addEventListener('keydown', limitCharacters, false)
