@@ -4,6 +4,8 @@ const numberBlock = document.querySelector('[data-number-block][data-maxlength]'
 const blockSize = [...document.querySelectorAll('input[name="size"]')]
 const palette = document.querySelector('[data-palette]')
 const templates = document.querySelector('#templates')
+const copy = document.querySelector('#copy')
+const paste = document.querySelector('#paste')
 const canvas = document.querySelector('#pixel')
 const canvasContext = canvas.getContext('2d')
 
@@ -172,6 +174,40 @@ templates.addEventListener('change', ({target}) => {
     changeBlockSize(grid)
     numberBlock.innerText = template
     redrawCanvas(numberBlock.innerText)
+})
+
+copy.addEventListener('click', () => {
+    const textarea = document.createElement("textarea");
+    textarea.textContent = numberBlock.innerText;
+    textarea.style.position = "fixed";
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        copy.innerText = 'copied!'
+        setTimeout(() => {
+            copy.innerText = 'copy'
+        }, 1000)
+        return document.execCommand("copy");
+    } catch (ex) {
+        console.warn("Copy to clipboard failed.", ex);
+        return false;
+    } finally {
+        document.body.removeChild(textarea);
+    }
+})
+
+paste.addEventListener('click', () => {
+    navigator.clipboard.readText()
+        .then(text => {
+            const maxLength = +numberBlock.dataset.maxlength
+            const insert = text.replace(/[^0123]/g, '').substr(0, maxLength)
+            let rest = '0'.repeat(maxLength - insert.length > 0 ? maxLength - insert.length : 0)
+            numberBlock.innerText = insert + rest
+            redrawCanvas(insert + rest)
+        })
+        .catch(err => {
+            console.error('Failed to read clipboard contents: ', err);
+        });
 })
 
 buildPalette()
