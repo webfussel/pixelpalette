@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>PixelPalette</title>
+    </head>
+    <body>
+        <header>
+            <h1>PixelPalette</h1>
+        </header>
+        <main>
+            <div data-config>
+                <section data-size>
+                    <h2>Canvas Size</h2>
+                    <div data-container>
+                        <label>
+                            <input type="radio" name="size" value="8" checked />
+                            8x8
+                        </label>
+                        <label>
+                            <input type="radio" name="size" value="16"/>
+                            16x16
+                        </label>
+                        <label>
+                            <input type="radio" name="size" value="32"/>
+                            32x32
+                        </label>
+                    </div>
+                </section>
+                <section data-palette>
+                    <h2>Palette</h2>
+                    <div data-container></div>
+                </section>
+            </div>
+            <section data-draw>
+                <h3>"Draw" here</h3>
+                <div data-number-block data-maxlength="64" contenteditable="true"></div>
+            </section>
+            <section data-canvas>
+                <h3>See here</h3>
+                <canvas id="pixel" width="128" height="128"></canvas>
+            </section>
+        </main>
+    </body>
+</html>

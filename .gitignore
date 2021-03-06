@@ -1,0 +1,9 @@
+# ide and os
+.idea
+.vscode
+.DS_store
+*.iml
+
+# node
+node_modules
+dist
