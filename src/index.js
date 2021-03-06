@@ -3,11 +3,25 @@ import './index.scss'
 const numberBlock = document.querySelector('[data-number-block][data-maxlength]')
 const blockSize = [...document.querySelectorAll('input[name="size"]')]
 const palette = document.querySelector('[data-palette]')
+const templates = document.querySelector('#templates')
 const canvas = document.querySelector('#pixel')
 const canvasContext = canvas.getContext('2d')
 
 let gridSize = 8;
 const pixelSize = 16;
+
+const temps = [
+    {
+        name: 'blank',
+        grid: 8,
+        template: '0'.repeat(gridSize ** 2)
+    },
+    {
+        name: 'red',
+        grid: 16,
+        template: '0000011111100000000012222221000000012222222210000001222222221000001112333321110000113111111311000131333333331310013333133133331000113313313311000011133223311100013311111111331001331111111133100011122112211100000121122112100000012221122210000000111001110000'
+    }
+]
 
 let currentPalette = 0
 
@@ -92,13 +106,17 @@ const limitCharacters = ev => {
 setBlockInner()
 numberBlock.addEventListener('keydown', limitCharacters, false)
 
+const changeBlockSize = size => {
+    numberBlock.dataset.maxlength = `${(size) ** 2}`
+    numberBlock.style.setProperty('--grid-size', size)
+    gridSize = size
+    setBlockInner()
+    canvas.width = canvas.height = gridSize * pixelSize
+}
+
 blockSize.forEach(size => {
     size.addEventListener('change', ({target}) => {
-        numberBlock.dataset.maxlength = `${(+target.value) ** 2}`
-        numberBlock.style.setProperty('--grid-size', target.value)
-        gridSize = +target.value
-        setBlockInner()
-        canvas.width = canvas.height = gridSize * pixelSize
+        changeBlockSize(+target.value)
         redrawCanvas(numberBlock.innerText)
     })
 })
@@ -136,5 +154,22 @@ const buildPalette = () => {
     }
 }
 
+const buildTemplates = () => {
+    temps.forEach(template => {
+        const option = document.createElement('option')
+        option.value = `${template.grid}|${template.template}`
+        option.innerText = template.name
+        templates.append(option)
+    })
+}
+
+templates.addEventListener('change', ({target}) => {
+    const [grid, template] = target.value.split('|')
+    changeBlockSize(grid)
+    numberBlock.innerText = template
+    redrawCanvas(numberBlock.innerText)
+})
+
 buildPalette()
+buildTemplates()
 redrawCanvas()

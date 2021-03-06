@@ -7,6 +7,14 @@
     <body>
         <header>
             <h1>PixelPalette</h1>
+            <p>
+                This is a PoC for creating sprites out of a string with digits ranging from 0 - 3, with each digit representing a color of the color palette.<br/>
+                If you want to try it out, just enter any of these numbers in the 'Draw here' Panel. <br>
+                You can find the source code on <a href="https://github.com/webfussel/pixelpalette">github</a><br/>
+                <br/>
+                I really didn't care that much about mobile friendliness or design or anything.<br/>
+                It's just a PoC as mentioned above.
+            </p>
         </header>
         <main>
             <div data-config>
@@ -30,6 +38,12 @@
                 <section data-palette>
                     <h2>Palette</h2>
                     <div data-container></div>
+                </section>
+                <section data-templates>
+                    <h2>Templates</h2>
+                    <label>
+                        <select id="templates"></select>
+                    </label>
                 </section>
             </div>
             <section data-draw>
