@@ -51,18 +51,24 @@
                     </label>
                 </section>
             </div>
-            <section data-draw>
-                <h3>"Draw" here</h3>
-                <div data-number-block data-maxlength="64" contenteditable="true"></div>
-                <div>
-                    <button id="copy">copy</button>
-                    <button id="paste">paste</button>
-                </div>
-            </section>
-            <section data-canvas>
-                <h3>See here</h3>
-                <canvas id="pixel" width="128" height="128"></canvas>
-            </section>
+            <div data-see>
+                <section data-draw>
+                    <h3>"Draw" here</h3>
+                    <div data-number-block data-maxlength="64" contenteditable="true"></div>
+                    <div>
+                        <button id="copy">copy</button>
+                        <button id="paste">paste</button>
+                    </div>
+                </section>
+                <section data-canvas>
+                    <h3>See here</h3>
+                    <canvas id="pixel" width="128" height="128"></canvas>
+                </section>
+                <section data-compressed>
+                    <h3>Compressed</h3>
+                    <div data-compressed-block></div>
+                </section>
+            </div>
         </main>
     </body>
 </html>

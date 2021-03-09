@@ -1,6 +1,8 @@
 import './index.scss'
 
 const drawBlockElement = document.querySelector('[data-number-block][data-maxlength]')
+const compressedBlockElement = document.querySelector('[data-compressed-block]')
+const uncompressedBlockElement = document.querySelector('[data-uncompressed-block]')
 const gridSizeContainerElement = document.querySelector('[data-size] [data-container]')
 const paletteContainerElement = document.querySelector('[data-palette] [data-container]')
 const customPaletteInputelements = [...document.querySelectorAll('[data-custom-palette-input]')]
@@ -73,6 +75,14 @@ const palettes = [
 
 const possibleNumbers = palettes[0].map((c, i) => i).join('')
 
+// compressionblock = partSize * blockSize
+const compression = {
+    partSize: 2,
+    blockSize: 8,
+    compressionBlock () {
+        return this.partSize * this.blockSize
+    }
+}
 
 const setBlockInner = () => {
     drawBlockElement.innerText = '0'.repeat(+drawBlockElement.dataset.maxlength)
@@ -80,8 +90,26 @@ const setBlockInner = () => {
 
 const checkIfValidHexColor = text => /^[0-9A-F]{6}$/i.test(text)
 
-const redrawCanvas = (fields) => {
+const compress = fields => {
+    let current = ''
+    let allBinary = ''
+    const result = []
+    for (let i = 0; i < fields.length; i++) {
+        const newBinary = parseInt(fields[i], 10).toString(2)
+        current += `${newBinary.length === 1 ? '0' : ''}${newBinary}`
+        if (current.length === compression.compressionBlock()) {
+            result.push(parseInt(current, compression.partSize).toString(compression.compressionBlock()).toUpperCase())
+            allBinary += current
+            current = ''
+        }
+    }
+
+    compressedBlockElement.innerText = result.join('')
+}
+
+const redrawCanvas = fields => {
     if (!fields) fields = drawBlockElement.innerText
+    compress(fields)
     let x = 0
     let y = 0
 
