@@ -7,8 +7,8 @@ const gridSizeContainerElement = document.querySelector('[data-size] [data-conta
 const paletteContainerElement = document.querySelector('[data-palette] [data-container]')
 const customPaletteInputelements = [...document.querySelectorAll('[data-custom-palette-input]')]
 const templatesSelectElement = document.querySelector('[data-templates-select]')
-const copy = document.querySelector('#copy')
-const paste = document.querySelector('#paste')
+const copy = document.querySelector('#copy-draw')
+const paste = document.querySelector('#paste-draw')
 const canvas = document.querySelector('#pixel')
 const canvasContext = canvas.getContext('2d')
 
@@ -75,38 +75,43 @@ const palettes = [
 
 const possibleNumbers = palettes[0].map((c, i) => i).join('')
 
-// compressionblock = partSize * blockSize
-const compression = {
-    partSize: 2,
-    blockSize: 8,
-    compressionBlock () {
-        return this.partSize * this.blockSize
-    }
+const comp = {
+    chunk: 2,
+    fromBase: 4,
+    toBase: 16
 }
 
 const setBlockInner = () => {
     drawBlockElement.innerText = '0'.repeat(+drawBlockElement.dataset.maxlength)
 }
 
-const checkIfValidHexColor = text => /^[0-9A-F]{6}$/i.test(text)
-
-const compress = fields => {
-    let current = ''
-    let allBinary = ''
+const uncompress = compressed => {
     const result = []
-    for (let i = 0; i < fields.length; i++) {
-        const newBinary = parseInt(fields[i], 10).toString(2)
-        current += `${newBinary.length === 1 ? '0' : ''}${newBinary}`
-        if (current.length === compression.compressionBlock()) {
-            result.push(parseInt(current, compression.partSize).toString(compression.compressionBlock()).toUpperCase())
-            allBinary += current
-            current = ''
+    for (let i = 0; i < compressed.length; i++) {
+        let binary = parseInt(compressed[i], comp.toBase).toString(2)
+        binary = '0'.repeat(4).substr(binary.length) + binary;
+
+        let current = ''
+        for (let j = 0; j < binary.length; j++) {
+            current += binary[j]
+            if (current.length === 2) {
+                result.push(parseInt(current, 2).toString(10))
+                current = ''
+            }
         }
     }
 
-    compressedBlockElement.innerText = result.join('')
+    uncompressedBlockElement.innerText = result.join('')
 }
 
+const compress = fields => {
+    const regex = new RegExp('.{1,' + comp.chunk + '}', 'g')
+    const res = fields.match(regex).map(chunk => parseInt(chunk, comp.fromBase).toString(comp.toBase)).join('').toUpperCase()
+    compressedBlockElement.innerText = res || 0
+    uncompress(res)
+}
+
+const checkIfValidHexColor = text => /^[0-9A-F]{6}$/i.test(text)
 const redrawCanvas = fields => {
     if (!fields) fields = drawBlockElement.innerText
     compress(fields)
@@ -170,7 +175,7 @@ const changeGridSize = size => {
         element.checked = index === size
     })
     drawBlockElement.dataset.maxlength = `${(actualSize) ** 2}`
-    drawBlockElement.style.setProperty('--grid-size', actualSize + '')
+    document.body.style.setProperty('--grid-size', actualSize + '')
     setBlockInner()
     canvas.width = canvas.height = gridSizes[currentGridSize] * pixelSize
 }
