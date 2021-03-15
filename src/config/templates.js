@@ -19,14 +19,19 @@ const templates = [
     }
 ]
 
-export const resetTemplate = () => document.querySelector('[data-templates-select] option').selected = true
+/**
+ * Resets template to blank.
+ */
+export const resetTemplate = () => {document.querySelector('[data-templates-select] option').selected = true}
 
 templatesSelectElement.addEventListener('change', ({target}) => {
     const [grid, template] = target.value.split('|')
     Eventbus.emit('templateChanged', {gridSize: +grid, template})
 })
 
-
+/**
+ * Builds the config area for templates.
+ */
 export const buildTemplatesConfig = () => {
     templates.forEach(template => {
         const option = document.createElement('option')

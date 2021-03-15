@@ -11,6 +11,11 @@ const canvasContext = canvas.getContext('2d')
 
 const pixelSize = 16;
 
+/**
+ * Redraws the canvas with given fields string.
+ * If no fields are given it defaults to current draw block inner text.
+ * @param [fields] {string} Containing the fields to draw to the canvas
+ */
 const redrawCanvas = fields => {
     if (!fields) fields = getDrawBlockInner()
     compress(fields)

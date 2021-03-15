@@ -43,18 +43,36 @@ const palettes = [
     ]
 ]
 
+/**
+ * Checks if given string is valid hex number.
+ * @param text {string} Text to check
+ * @returns {boolean} If text is a valid hex number
+ */
 const checkIfValidHexColor = text => /^[0-9A-F]{6}$/i.test(text)
 
+/**
+ * Get color representation of digit based on the current palette.
+ * @param digit {number} The digit to get color for
+ * @returns {string} The hex color code of the digit
+ */
 export const getCurrentColorForDigit = (digit) => {
     const customPaletteColor = customPaletteInputElements[digit].value.trim()
     return checkIfValidHexColor(customPaletteColor) ? customPaletteColor : palettes[currentPalette][digit]
 }
 
+/**
+ * Changes the current palette to given index.
+ * @param index {number} Index of new Palette
+ * @fires Eventbus#colorPalettechanged
+ */
 const changePalette = (index) => {
     currentPalette = index;
     Eventbus.emit('colorPaletteChanged')
 }
 
+/**
+ * Builds the config area for palettes.
+ */
 export const buildPaletteConfig = () => {
     for (let i = 0; i < palettes.length; i++) {
         const radio = document.createElement('input')

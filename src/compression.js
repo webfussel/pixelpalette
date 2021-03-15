@@ -7,6 +7,10 @@ const comp = {
     toBase: 16
 }
 
+/**
+ * Uncompresses the compressed string TO FREAKING PROVE IT WORKS!
+ * @param compressed {string} The base16 compressed string to uncompress
+ */
 const uncompress = compressed => {
     const result = []
     for (let i = 0; i < compressed.length; i++) {
@@ -26,6 +30,10 @@ const uncompress = compressed => {
     uncompressedBlockElement.innerText = result.join('')
 }
 
+/**
+ * Compresses the given fields from base4 to base16 radix.
+ * @param fields {string} String in base4 to be compressed.
+ */
 export const compress = fields => {
     const regex = new RegExp('.{1,' + comp.chunk + '}', 'g')
     const res = fields.match(regex).map(chunk => parseInt(chunk, comp.fromBase).toString(comp.toBase)).join('').toUpperCase()
