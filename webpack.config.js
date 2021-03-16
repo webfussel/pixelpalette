@@ -1,7 +1,8 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
     mode: 'production',
@@ -14,6 +15,14 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: 'public/index.html',
             inject: true
+        }),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: 'public/img',
+                    to: 'img'
+                }
+            ]
         })
     ],
     devtool: 'eval-source-map',
