@@ -8,10 +8,10 @@ const comp = {
 }
 
 /**
- * Uncompresses the compressed string TO FREAKING PROVE IT WORKS!
- * @param compressed {string} The base16 compressed string to uncompress
+ * Decompresses the compressed string TO FREAKING PROVE IT WORKS!
+ * @param compressed {string} The base16 compressed string to decompress
  */
-const uncompress = compressed => {
+const decompress = compressed => {
     const result = []
     for (let i = 0; i < compressed.length; i++) {
         let binary = parseInt(compressed[i], comp.toBase).toString(2)
@@ -38,5 +38,5 @@ export const compress = fields => {
     const regex = new RegExp('.{1,' + comp.chunk + '}', 'g')
     const res = fields.match(regex).map(chunk => parseInt(chunk, comp.fromBase).toString(comp.toBase)).join('').toUpperCase()
     compressedBlockElement.innerText = res || 0
-    uncompress(res)
+    decompress(res)
 }
